@@ -1,0 +1,132 @@
+table SalesData
+	lineageTag: 04791d06-7fbb-4193-9d75-00cb0c03bb98
+
+	column OrderID
+		dataType: string
+		lineageTag: aa5f7804-9e9f-4bbd-b57d-77b1e8489299
+		summarizeBy: none
+		sourceColumn: OrderID
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 7ee203c9-8f25-4a8e-8755-18e0c3a2c24a
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column CustomerName
+		dataType: string
+		lineageTag: a72a3441-bfd5-4104-a8ad-aa65db55b535
+		summarizeBy: none
+		sourceColumn: CustomerName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product
+		dataType: string
+		lineageTag: 9cf7f2df-1da9-43e8-b64b-11024e8d13d9
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 92ea2fa9-97d9-46d9-aba4-0686cceff602
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: c54bde4a-98b5-401a-a8a3-31ffadb70826
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesAmount
+		dataType: int64
+		formatString: 0
+		lineageTag: 276ab3a1-5230-4047-9e8a-b492ff2d5a65
+		summarizeBy: sum
+		sourceColumn: SalesAmount
+
+		annotation SummarizationSetBy = Automatic
+
+	column CostPrice
+		dataType: double
+		lineageTag: bd09d6ec-b416-4b22-9f7c-0e38d6a8acf7
+		summarizeBy: sum
+		sourceColumn: CostPrice
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Profit
+		dataType: double
+		formatString: #,0.00
+		lineageTag: e43344c7-8687-43e7-8843-cc0837198440
+		summarizeBy: sum
+		sourceColumn: Profit
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: f1b750bc-bb7c-4093-a8d9-cef6829a4284
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segment
+		dataType: string
+		lineageTag: 3bfe0186-7314-42de-9677-3126770f991f
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column Team
+		dataType: string
+		lineageTag: 73e4ecbc-5096-4714-995b-a89ebabdb59a
+		summarizeBy: none
+		sourceColumn: Team
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesExecutive
+		dataType: string
+		lineageTag: f1590c37-6b46-41c0-9a10-35e9d20a9c89
+		summarizeBy: none
+		sourceColumn: SalesExecutive
+
+		annotation SummarizationSetBy = Automatic
+
+	partition SalesData = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("D:\DA\Internship\Sudha\PowerBi\Project\Raw Data\Sales_Data.xlsx"), null, true),
+				    SalesData_Sheet = Source{[Item="SalesData",Kind="Sheet"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(SalesData_Sheet, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"OrderID", type text}, {"OrderDate", type date}, {"CustomerName", type text}, {"Product", type text}, {"Category", type text}, {"Quantity", Int64.Type}, {"SalesAmount", Int64.Type}, {"CostPrice", type number}, {"Profit", type number}, {"Region", type text}, {"Segment", type text}, {"Team", type text}, {"SalesExecutive", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

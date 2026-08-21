@@ -1,0 +1,43 @@
+table SalesExecutives
+	lineageTag: 3da6e272-0dc8-48b5-ad88-ddf8aa615168
+
+	column SalesExecutiveID
+		dataType: string
+		lineageTag: f036ac54-6103-45f6-996a-75148a23cf75
+		summarizeBy: none
+		sourceColumn: SalesExecutiveID
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesExecutiveName
+		dataType: string
+		lineageTag: b93355e9-ab09-4ef8-a8f0-f8b89d2eb233
+		summarizeBy: none
+		sourceColumn: SalesExecutiveName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Team
+		dataType: string
+		lineageTag: 04cd1fcb-5722-4b57-b718-b107ac903f22
+		summarizeBy: none
+		sourceColumn: Team
+
+		annotation SummarizationSetBy = Automatic
+
+	partition SalesExecutives = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("D:\DA\Internship\Sudha\PowerBi\Project\Raw Data\Sales_Data.xlsx"), null, true),
+				    SalesExecutives_Sheet = Source{[Item="SalesExecutives",Kind="Sheet"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(SalesExecutives_Sheet,{{"Column1", type text}, {"Column2", type text}, {"Column3", type text}}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"SalesExecutiveID", type text}, {"SalesExecutiveName", type text}, {"Team", type text}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

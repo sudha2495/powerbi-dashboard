@@ -1,0 +1,49 @@
+table 'Period 2'
+	lineageTag: 33696fe0-4111-46be-86ac-c94706a4489c
+
+	column 'Period 2'
+		lineageTag: dea6cef3-d560-40f9-8e78-95de24cbbe4c
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Period 2 Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Period 2 Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Period 2 Fields'
+		isHidden
+		lineageTag: d53e5c0e-7173-4d5c-9b39-34f548fb772b
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Period 2 Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Period 2 Order'
+		isHidden
+		formatString: 0
+		lineageTag: 8f90b38b-f729-46aa-905e-e495788f7dec
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Period 2' = calculated
+		mode: import
+		source =
+				{
+				    ("Month", NAMEOF('Calender'[Start of Month]), 0),
+				    ("Quarter", NAMEOF('Calender'[Quarter]), 1),
+				    ("Year", NAMEOF('Calender'[Year]), 2)
+				}
+
+	annotation PBI_Id = 0da53c90fc57477eace0cb3d675bbd9c
+

@@ -1,0 +1,35 @@
+table Teams
+	lineageTag: f4375bfe-dbac-451e-a4d5-f2ec91a0a103
+
+	column TeamID
+		dataType: string
+		lineageTag: 584ffb92-27ae-4f0a-ae55-30d5b8b073be
+		summarizeBy: none
+		sourceColumn: TeamID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TeamName
+		dataType: string
+		lineageTag: a401c33d-bc91-4378-940a-47bfdd1fa2ac
+		summarizeBy: none
+		sourceColumn: TeamName
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Teams = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("D:\DA\Internship\Sudha\PowerBi\Project\Raw Data\Sales_Data.xlsx"), null, true),
+				    Teams_Sheet = Source{[Item="Teams",Kind="Sheet"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(Teams_Sheet,{{"Column1", type text}, {"Column2", type text}}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"TeamID", type text}, {"TeamName", type text}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

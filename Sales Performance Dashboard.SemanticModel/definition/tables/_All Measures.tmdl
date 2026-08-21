@@ -1,0 +1,108 @@
+table '_All Measures'
+	lineageTag: 368e1188-75cb-4ed8-bf58-4cbd0d001af0
+
+	measure 'Total Sales' = SUM(SalesData[SalesAmount])
+		formatString: #,0
+		lineageTag: f3875f33-9c8a-49e5-a635-722aee25ec14
+
+	measure 'Total Quantity Sold' = SUM(SalesData[Quantity])
+		formatString: #,0
+		lineageTag: c80b98be-d729-4c3e-9d1c-f968d1f68a7b
+
+	measure 'Total Orders' = COUNT(SalesData[OrderID])
+		formatString: #,0
+		lineageTag: 07b12649-2658-431b-8ab8-af17ce220ed8
+
+	measure 'Total Customers' = DISTINCTCOUNT(Customers[CustomerID])
+		formatString: #,0
+		lineageTag: 306856b1-6204-485d-8807-9e36652898f6
+
+	measure 'Average Order Value' = VAR _sales = [Total Sales]  VAR _orders = [Total Orders]  RETURN DIVIDE(_sales,_orders)
+		lineageTag: edf47682-4c58-4e1c-934e-a9447bc40ec3
+
+	measure 'Profit margin %' = VAR _sales = [Total Sales] VAR _profit = SUM(SalesData[Profit]) RETURN DIVIDE(_profit,_sales)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 065156bc-2b61-4503-a60e-a50b2ebab530
+
+	measure 'Sales Growth %' = VAR _SalesPrePeriod = CALCULATE( [Total Sales], PREVIOUSMONTH('Calender'[Date])    )        VAR _SalesCurrPeriod = [Total Sales] RETURN if(_SalesPrePeriod=0,BLANK(),DIVIDE((_SalesCurrPeriod-_SalesPrePeriod),_SalesPrePeriod))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 6571d8f0-7346-4588-85ba-dab5258337e1
+
+	measure 'Repeat Customers' = CALCULATE(DISTINCTCOUNT(SalesData[CustomerName]),FILTER(SalesData,CALCULATE(COUNTROWS(SalesData),ALLEXCEPT(SalesData,SalesData[CustomerName]))>1))
+		formatString: #,0
+		lineageTag: 727a4b88-f95f-4969-a572-3a68ec0609a7
+
+	measure 'Returing Customers %' = DIVIDE([Repeat Customers],[Total Customers])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 5f975ed0-edc9-43c6-b7fc-c6dfab60b1c7
+
+	measure 'Most Selling Product' = CALCULATE(FIRSTNONBLANK(SalesData[Product],1),TOPN(1,ALL(SalesData[Product]),[Total Quantity Sold],DESC) )
+		lineageTag: 0ad9ea19-8ba6-4195-88c7-af6369bf768b
+
+	measure 'Least Selling Product' = CALCULATE(FIRSTNONBLANK(SalesData[Product],1),TOPN(1,ALL(SalesData[Product]),[Total Quantity Sold],ASC) )
+		lineageTag: b5981d54-16b5-4564-a920-35ed0d531eb5
+
+	measure 'Top Customer' = CALCULATE(FIRSTNONBLANK(SalesData[CustomerName],1),TOPN(1,ALL(SalesData[CustomerName]),[Total Quantity Sold],DESC) )
+		lineageTag: c9b39ab7-f67c-49a2-8fdb-220deb34ac81
+
+	measure 'Most Selling Product Quantity' = VAR _productname = [Most Selling Product] RETURN CALCULATE([Total Quantity Sold],SalesData[Product]=_productname)
+		formatString: 0
+		lineageTag: be20d91c-61d5-44dc-b4c9-9f9c87696da5
+
+	measure 'Least Selling Product Quantity' = VAR _productname = [Least Selling Product] RETURN CALCULATE([Total Quantity Sold],SalesData[Product]=_productname)
+		formatString: 0
+		lineageTag: 360d7130-dd8a-40f2-8a42-c426002d3627
+
+	measure 'Top Customer Product Quantity' = VAR _productname = [Top Customer] RETURN CALCULATE([Total Quantity Sold],SalesData[CustomerName]=_productname)
+		formatString: 0
+		lineageTag: 79b06262-2420-47af-b8fd-0cf22e932f0c
+
+	measure 'Average Revenue Per Customer' = VAR _sales = [Total Sales] VAR _uniquecustomers = DISTINCTCOUNT(SalesData[CustomerName]) RETURN DIVIDE(_sales,_uniquecustomers)
+		lineageTag: 231d5d73-5ebc-4aec-9b8f-c579738a99d4
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Cumulative Sales' = TOTALYTD([Total Sales], 'Calender'[Date])
+		formatString: 0
+		lineageTag: fbbcd862-054e-4ac8-a8fa-195bcd388318
+
+	measure 'Cumulative Profit' = TOTALYTD(Sum(SalesData[Profit]),'Calender'[Date])
+		formatString: 0
+		lineageTag: a6f0def3-610f-4b4f-9f56-24514307e615
+
+	measure 'Total Variable Cost' = SUMX(SalesData,SalesData[CostPrice]*SalesData[Quantity])
+		formatString: #,0
+		lineageTag: f0a5503a-046c-4658-b7f0-49a634e9d596
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Contribution Margin' = [Total Sales]-[Total Variable Cost]
+		lineageTag: 1874677e-ea12-46e9-8700-d469b50d9452
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Contribution Margin%' = DIVIDE([Contribution Margin],[Total Sales])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: fbc67b26-ef15-4bbe-bd21-8cb3c248e197
+
+	column Column1
+		dataType: string
+		lineageTag: 9e99be67-39a5-4586-9b34-bcd115dcfafd
+		summarizeBy: none
+		sourceColumn: Column1
+
+		annotation SummarizationSetBy = Automatic
+
+	partition '_All Measures' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}})
+				in
+				    #"Changed Type"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

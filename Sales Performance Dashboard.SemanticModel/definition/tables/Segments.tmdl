@@ -1,0 +1,35 @@
+table Segments
+	lineageTag: 47fd2807-6a50-4151-82eb-730759775782
+
+	column SegmentID
+		dataType: string
+		lineageTag: 039b4fc2-0c5b-4a10-80ce-8fd8619d66c7
+		summarizeBy: none
+		sourceColumn: SegmentID
+
+		annotation SummarizationSetBy = Automatic
+
+	column SegmentName
+		dataType: string
+		lineageTag: 3cf2f796-8ba7-4869-a5d7-30dc430cdea7
+		summarizeBy: none
+		sourceColumn: SegmentName
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Segments = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("D:\DA\Internship\Sudha\PowerBi\Project\Raw Data\Sales_Data.xlsx"), null, true),
+				    Segments_Sheet = Source{[Item="Segments",Kind="Sheet"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(Segments_Sheet,{{"Column1", type text}, {"Column2", type text}}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"SegmentID", type text}, {"SegmentName", type text}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

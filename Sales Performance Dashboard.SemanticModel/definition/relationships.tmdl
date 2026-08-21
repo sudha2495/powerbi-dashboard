@@ -1,0 +1,8 @@
+relationship AutoDetected_0d236b2e-1ebb-4beb-b79e-c3f0912ca29a
+	fromColumn: SalesData.CustomerName
+	toColumn: Customers.CustomerName
+
+relationship 22bf8c2d-d136-5b05-ed07-fbe02f25e175
+	fromColumn: SalesData.OrderDate
+	toColumn: Calender.Date
+

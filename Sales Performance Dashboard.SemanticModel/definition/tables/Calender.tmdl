@@ -1,0 +1,100 @@
+table Calender
+	lineageTag: 959150a7-d7a0-4f41-9113-d4040d7e34f8
+
+	column Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 18f6ed7f-26a9-4deb-8794-81313a45feeb
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 6170fd58-b86e-49d3-85ab-b59123bd3fba
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: int64
+		formatString: 0
+		lineageTag: e3a442e2-bee7-41ba-8a4a-f1115e42ccb6
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Start of Month'
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: e25308dc-7862-4495-bd9f-a54ea0f6ed6e
+		summarizeBy: none
+		sourceColumn: Start of Month
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Day Name'
+		dataType: string
+		lineageTag: b0a67cf8-a297-4385-ab49-c052d50d6978
+		summarizeBy: none
+		sourceColumn: Day Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Week of Year'
+		dataType: int64
+		formatString: 0
+		lineageTag: 144cbf0f-fc58-40c2-9668-b83e1df5a727
+		summarizeBy: none
+		sourceColumn: Week of Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: string
+		lineageTag: 8311e319-5b17-43a0-ad99-7bd1d24b0536
+		summarizeBy: none
+		sourceColumn: Quarter
+		sortByColumn: 'Quarter Sort'
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Quarter Sort' = QUARTER(Calender[Date])
+		formatString: 0
+		lineageTag: 0e840ea3-d8da-4b33-a343-46d0c163ad81
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Calender = m
+		mode: import
+		source =
+				let
+				    mindate = List.Min(SalesData[OrderDate]),
+				    maxdate = Date.From(DateTime.LocalNow()),
+				    datelist = {Number.From(mindate)..Number.From(maxdate)},
+				    calender = Table.FromList(datelist,Splitter.SplitByNothing(),{"Date"}),
+				    #"Changed Type" = Table.TransformColumnTypes(calender,{{"Date", type date}}),
+				    #"Inserted Year" = Table.AddColumn(#"Changed Type", "Year", each Date.Year([Date]), Int64.Type),
+				    #"Inserted Month" = Table.AddColumn(#"Inserted Year", "Month", each Date.Month([Date]), Int64.Type),
+				    #"Inserted Start of Month" = Table.AddColumn(#"Inserted Month", "Start of Month", each Date.StartOfMonth([Date]), type date),
+				    #"Inserted Day Name" = Table.AddColumn(#"Inserted Start of Month", "Day Name", each Date.DayOfWeekName([Date]), type text),
+				    #"Inserted Week of Year" = Table.AddColumn(#"Inserted Day Name", "Week of Year", each Date.WeekOfYear([Date]), Int64.Type),
+				    #"Inserted Quarter" = Table.AddColumn(#"Inserted Week of Year", "Quarter", each "Q" & Text.From(Date.QuarterOfYear([Date])), type text)
+				in
+				    #"Inserted Quarter"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
